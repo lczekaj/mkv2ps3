@@ -3,27 +3,12 @@
 # Coded by Lukasz Czekaj <lukasz[at]czekaj.us>
 # Based on code by Werner Gillmer <werner.gillmer@gmail.com>
 
-# Usage : mkv2ps3.sh movie.mkv
-#         mkv2ps3.sh movie.mkv /Volumes/ExtHDD/Video/
-#         mkv2ps3.sh /path/to/dir/with/mkv/files 
-#         mkv2ps3.sh /path/to/dir/with/mkv/files /Volumes/ExtHDD/Video/
-#         mkv2ps3.sh .
-#         mkv2ps3.sh . /Volumes/ExtHDD/Video
-
-# The main purpose of this fork is to do the final mp4 file generation at destination directory (e.g. /Volumes/ExtHDD/Video/). It is useful and time-saving if you tend to copy your mp4 file to an external storage like USB stick or external HDD. It is done for you while saving the file.
-#
-# Warning: if directory input is used all mkv files will be renamed by replacing spaces with underscores (_)
-#
-# Tested on Mac OS X Lion (10.7.3). The mp4 files can appear broken on a Mac but they play fine on PS3. It's because of replacing mp4box completely with ffmpeg for speed sake.
-# I use homebrew (https://github.com/mxcl/homebrew/) to install dependencies such as mkvtoolnix and ffmpeg.
-
 function cleanup {
     echo -n "### Cleaning up... "
     # to delete original file after conversion just uncomment the line below
     # rm $1
-    rm *mkv.dts
-    rm *mkv.aac
-    rm *mkv.264
+    rm *mkv.ac3
+    rm *mkv.h264
 
     echo -n "Renaming to mp4... "
     NEWNAME=`ls $1 | sed 's/mkv.mp4/mp4/'`

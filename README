@@ -1,6 +1,6 @@
-Script converting mkv files to mp4 files compatible with Sony Playstation 3
+Script for converting mkv files to mp4 files compatible with Sony Playstation 3
 
-Usage : mkv2ps3.sh movie.mkv
+USAGE : mkv2ps3.sh movie.mkv
         mkv2ps3.sh movie.mkv /Volumes/ExtHDD/Video/
         mkv2ps3.sh /path/to/dir/with/mkv/files 
         mkv2ps3.sh /path/to/dir/with/mkv/files /Volumes/ExtHDD/Video/
@@ -9,7 +9,10 @@ Usage : mkv2ps3.sh movie.mkv
 
 The main purpose of this fork is to do the final mp4 file generation at destination directory (e.g. /Volumes/ExtHDD/Video/). It is useful and time-saving if you tend to copy your mp4 file to an external storage like USB stick or external HDD. It is done for you while saving the file.
 
-Warning: if directory input is used all mkv files will be renamed by replacing spaces with underscores (_)
+WARNING: if directory input is used all mkv files will be renamed by replacing spaces with underscores (_)
 
-Tested on Mac OS X Lion (10.7.3). The mp4 files can appear broken on a Mac but they play fine on PS3. It's because of replacing mp4box completely with ffmpeg for speed sake.
+COMPATIBILITY: ffmpeg just copies source video and audio assuming they are h264 and ac3. There can be issues if your audio system doesn't support Dolby Digital 5.1 or the movie has other audio format (e.g. DTS). The mp4 files can appear broken on a Mac/PC but they play fine on a PS3 -it's because of replacing mp4box completely with ffmpeg for speed sake.
+
+Tested on Mac OS X Lion (10.7.3). Linux testing needed.
+
 I use homebrew (https://github.com/mxcl/homebrew/) to install dependencies such as mkvtoolnix and ffmpeg.
