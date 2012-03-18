@@ -1,92 +1,99 @@
 #!/bin/bash
-# Script to convert mkv files to PS3 playable mp4
-# Coded by Werner Gillmer <werner.gillmer@gmail.com>
-# following psilo357 advice from https://bbs.archlinux.org/viewtopic.php?id=62298&p=2
-# Extended by Lukasz Czekaj <lukasz[at]czekaj.us>
+# Script converting mkv files to mp4 files compatible with Sony Playstation 3
+# Coded by Lukasz Czekaj <lukasz[at]czekaj.us>
+# Based on code by Werner Gillmer <werner.gillmer@gmail.com>
 
 # Usage : mkv2ps3.sh movie.mkv
+#         mkv2ps3.sh movie.mkv /Volumes/ExtHDD/Video/
 #         mkv2ps3.sh /path/to/dir/with/mkv/files 
-# or	: mkv2ps3.sh movie.mkv /output_dir/
+#         mkv2ps3.sh /path/to/dir/with/mkv/files /Volumes/ExtHDD/Video/
+#         mkv2ps3.sh .
+#         mkv2ps3.sh . /Volumes/ExtHDD/Video
 
-# MP4Box http://gpac.wp.institut-telecom.fr/mp4box/
-# mkvtoolnix http://www.bunkus.org/videotools/mkvtoolnix/
-# ffmpeg http://www.ffmpeg.org/
-
-# Tested on Linux (Arch) and OS X(Lion)
-
-OUTPUT_DIR=$2
+# The main purpose of this fork is to do the final mp4 file generation at destination directory (e.g. /Volumes/ExtHDD/Video/). It is useful and time-saving if you tend to copy your mp4 file to an external storage like USB stick or external HDD. It is done for you while saving the file.
+#
+# Warning: if directory input is used all mkv files will be renamed by replacing spaces with underscores (_)
+#
+# Tested on Mac OS X Lion (10.7.3).
+# I use homebrew (https://github.com/mxcl/homebrew/) to install dependencies such as mkvextract, ffmpeg and mp4box.
 
 function cleanup {
-    echo -n "### Cleaning up..."
+    echo -n "### Cleaning up... "
     # to delete original file after conversion just uncomment the line below
     # rm $1
     rm *mkv.dts
     rm *mkv.aac
     rm *mkv.264
 
-	if  [ -d $OUTPUT_DIR ]; then
-	    NEWNAME=`ls $OUTPUT_DIR$1.mp4 | sed 's/mkv.mp4/mp4/'`
-	    mv $OUTPUT_DIR$1.mp4 $NEWNAME
-	else
-	    NEWNAME=`ls $1.mp4 | sed 's/mkv.mp4/mp4/'`
-	    mv $1.mp4 $NEWNAME
-	fi
+    echo -n "Renaming to mp4... "
+    NEWNAME=`ls $1 | sed 's/mkv.mp4/mp4/'`
+    mv $1 $NEWNAME
 	
     echo "done"
 }
 
-
 function mkv2ps3 {
     # Extracts the video stream
-    mkvextract tracks "$1" 1:$1.264
+    mkvextract tracks $1 1:$1.264
     # Extracts the audio stream
-    mkvextract tracks "$1" 2:$1.dts
+    mkvextract tracks $1 2:$1.dts
 
     # Makes the audio stream a pure aac
     ffmpeg -i $1.dts -vcodec libfaac $1.aac
 
     # Merge everything to mp4
-	if [ -d $OUTPUT_DIR ]; then
-		    echo -e "### Creating .mp4 at $OUTPUT_DIR$1\r"
-	    MP4Box -new $OUTPUT_DIR$1.mp4 -add $1.264 -add $1.aac -fps 23.976
-	else
-	    MP4Box -new $1.mp4 -add $1.264 -add $1.aac -fps 23.976
+    OUT_FILE=$1.mp4
+    if [ "$OUT_DIR" ] && [ -d $OUT_DIR ]; then
+        OUT_DIR=${OUT_DIR%/}
+        OUT_FILE="${OUT_FILE##*/}"
+        echo -e "### Creating $OUT_FILE at $OUT_DIR\r"
+        OUT_FILE="$OUT_DIR/$OUT_FILE"
 	fi
+    MP4Box -new "$OUT_FILE" -add $1.264 -add $1.aac -fps 23.976
 
-    cleanup $1 
+    cleanup $OUT_FILE 
 }
 
-echo -e "Output will be copied to: $OUTPUT_DIR\r"
-
+IN_FILE=$1
+OUT_FILE="${IN_FILE##*/}"      # Strip longest match of */ from start
+OUT_DIR=$2
+if  [ "$2" ] && [ -d "$2" ]; then
+    echo -e "### Output will be created in $OUT_DIR\r"
+fi
 if [ -d $1 ]; then
-    DIR=$1
-    cd $DIR
+    IN_DIR=$1
+    echo -e "### Input is a directory. Using *.mkv in $IN_DIR\r"
+    cd $IN_DIR
 
     # Replace all white spaces with a _ 
     #IFS=$'\n'
-    for f in *; do
+    for f in *.mkv; do
         file=$(echo $f | sed 's/ /_/g')
-        mv "$f" $file
+        if [ "$f" != $file ]; then
+            echo -e "### Moving file $f\r"
+            mv "$f" $file
+        fi
     done
     #unset IFS
 
-    for mkv_file in *.mkv;
+    for IN_FILE in *.mkv;
         do
-            mkv2ps3 $mkv_file
+            IN_DIR=${IN_DIR%/}            
+            mkv2ps3 "$IN_DIR/$IN_FILE"
     done
+else
+    if [ -f "$1" ]; then 
+        # Replace white spaces in file name with a _
+        IN_FILE=$(echo "$1" | sed 's/ /_/g')
+        mv "$1" $IN_FILE  
+        mkv2ps3 $IN_FILE
     else
-        if [ -f "$1" ]; then 
-            # Replace white spaces in file name with a _
-            new_file=$(echo "$1" | sed 's/ /_/g')
-            mv "$1" $new_file  
+        echo "### ERROR: Cannot find $new_file"
+        exit
+    fi
+    unset IN_DIR
+fi
 
-            mkv2ps3 $new_file
-            else
-                echo "ERROR: Cannot find $new_file"
-                exit
-        fi
-   unset DIR
-fi 
-     
-
-
+unset IN_FILE
+unset OUT_DIR
+unset OUT_FILE
