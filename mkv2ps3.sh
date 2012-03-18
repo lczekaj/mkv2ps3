@@ -14,8 +14,8 @@
 #
 # Warning: if directory input is used all mkv files will be renamed by replacing spaces with underscores (_)
 #
-# Tested on Mac OS X Lion (10.7.3).
-# I use homebrew (https://github.com/mxcl/homebrew/) to install dependencies such as mkvextract, ffmpeg and mp4box.
+# Tested on Mac OS X Lion (10.7.3). The mp4 files can appear broken on a Mac but they play fine on PS3. It's because of replacing mp4box completely with ffmpeg for speed sake.
+# I use homebrew (https://github.com/mxcl/homebrew/) to install dependencies such as mkvtoolnix and ffmpeg.
 
 function cleanup {
     echo -n "### Cleaning up... "
@@ -33,10 +33,7 @@ function cleanup {
 }
 
 function mkv2ps3 {
-    # Extracts the video stream
-    mkvextract tracks $1 1:$1.264
-    # Extracts the audio stream
-    mkvextract tracks $1 2:$1.dts
+    mkvextract tracks $1 1:$1.h264 2:$1.ac3
 
     # Makes the audio stream a pure aac
     ffmpeg -i $1.dts -vcodec libfaac $1.aac
@@ -49,7 +46,7 @@ function mkv2ps3 {
         echo -e "### Creating $OUT_FILE at $OUT_DIR\r"
         OUT_FILE="$OUT_DIR/$OUT_FILE"
 	fi
-    MP4Box -new "$OUT_FILE" -add $1.264 -add $1.aac -fps 23.976
+    ffmpeg -fflags genpts -f h264 -i $1.h264 -f ac3 -i $1.ac3 -vcodec copy -acodec copy -copyts -f mp4 -y $OUT_FILE
 
     cleanup $OUT_FILE 
 }

@@ -11,5 +11,5 @@ The main purpose of this fork is to do the final mp4 file generation at destinat
 
 Warning: if directory input is used all mkv files will be renamed by replacing spaces with underscores (_)
 
-Tested on Mac OS X Lion (10.7.3).
-I use homebrew (https://github.com/mxcl/homebrew/) to install dependencies such as mkvextract, ffmpeg and mp4box.
+Tested on Mac OS X Lion (10.7.3). The mp4 files can appear broken on a Mac but they play fine on PS3. It's because of replacing mp4box completely with ffmpeg for speed sake.
+I use homebrew (https://github.com/mxcl/homebrew/) to install dependencies such as mkvtoolnix and ffmpeg.
