@@ -21,7 +21,7 @@ function mkv2ps3 {
     mkvextract tracks $1 1:$1.h264 2:$1.ac3
 
     # Makes the audio stream a pure aac
-    ffmpeg -i $1.dts -vcodec libfaac $1.aac
+    # ffmpeg -i $1.dts -vcodec libfaac $1.aac
 
     # Merge everything to mp4
     OUT_FILE=$1.mp4
